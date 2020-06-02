@@ -64,10 +64,24 @@ namespace Dnt.Commands
         {
             var solutionDir = Path.GetDirectoryName(projectPath);
 
-            return new Dictionary<string, string>
+            var props = new Dictionary<string, string>
             {
                 { "SolutionDir", solutionDir }
             };
+            
+            //Grab any commandline values to set underyling MSBuild properties via -property:X=Y
+            var cmd = Environment.CommandLine.Split(' ');
+            foreach (var param in cmd)
+            {
+                if (param.StartsWith("-property:"))
+                {
+                    var prop = param.Substring(10).Split('=');
+                    if(prop != null || prop.Length == 2 && !props.ContainsKey(prop[0]))
+                        props.Add( prop[0], prop[1]);
+                }
+
+            }
+            return props;
         }
     }
 }

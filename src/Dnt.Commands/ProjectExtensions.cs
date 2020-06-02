@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Xml;
-using Dnt.Commands.Packages.Switcher;
+
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Locator;
@@ -32,11 +32,11 @@ namespace Dnt.Commands
             return (projectAbsolutePath.EndsWith(".csproj") || projectAbsolutePath.EndsWith(".vbproj"));
         }
 
-        public static ProjectInformation LoadProject(string projectPath, ReferenceSwitcherConfiguration configuration=null)
+        public static ProjectInformation LoadProject(string projectPath, Dictionary<string,string> globals=null)
         {
             // Based on https://daveaglick.com/posts/running-a-design-time-build-with-msbuild-apis
 
-            var globalProperties = GetGlobalProperties(projectPath, configuration);
+            var globalProperties = GetGlobalProperties(projectPath, globals);
 
             var isSdkStyle = false;
 
@@ -61,7 +61,7 @@ namespace Dnt.Commands
             }
         }
 
-        private static Dictionary<string, string> GetGlobalProperties(string projectPath, ReferenceSwitcherConfiguration configuration)
+        private static Dictionary<string, string> GetGlobalProperties(string projectPath, Dictionary<string,string> globals)
         {
             var solutionDir = Path.GetDirectoryName(projectPath);
 
@@ -70,9 +70,9 @@ namespace Dnt.Commands
                 { "SolutionDir", solutionDir }
             };
             
-            if (configuration != null)
+            if (globals != null)
             {
-                foreach (var keyValuePair in configuration.Globals)
+                foreach (var keyValuePair in globals)
                 {
                     if (!props.ContainsKey(keyValuePair.Key))
                         props.Add(keyValuePair.Key, keyValuePair.Value);

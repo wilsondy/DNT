@@ -60,7 +60,7 @@ namespace Dnt.Commands.Packages
                 {
                     try
                     {
-                        using (var projectInformation = ProjectExtensions.LoadProject(solutionProject.AbsolutePath, configuration))
+                        using (var projectInformation = ProjectExtensions.LoadProject(solutionProject.AbsolutePath, configuration?.Globals))
                         {
                             foreach (var mapping in configuration.Mappings)
                             {

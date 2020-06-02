@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Xml;
+using Dnt.Commands.Packages.Switcher;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Locator;
@@ -31,11 +32,11 @@ namespace Dnt.Commands
             return (projectAbsolutePath.EndsWith(".csproj") || projectAbsolutePath.EndsWith(".vbproj"));
         }
 
-        public static ProjectInformation LoadProject(string projectPath)
+        public static ProjectInformation LoadProject(string projectPath, ReferenceSwitcherConfiguration configuration=null)
         {
             // Based on https://daveaglick.com/posts/running-a-design-time-build-with-msbuild-apis
 
-            var globalProperties = GetGlobalProperties(projectPath);
+            var globalProperties = GetGlobalProperties(projectPath, configuration);
 
             var isSdkStyle = false;
 
@@ -60,7 +61,7 @@ namespace Dnt.Commands
             }
         }
 
-        private static Dictionary<string, string> GetGlobalProperties(string projectPath)
+        private static Dictionary<string, string> GetGlobalProperties(string projectPath, ReferenceSwitcherConfiguration configuration)
         {
             var solutionDir = Path.GetDirectoryName(projectPath);
 
@@ -69,18 +70,15 @@ namespace Dnt.Commands
                 { "SolutionDir", solutionDir }
             };
             
-            //Grab any commandline values to set underyling MSBuild properties via -property:X=Y
-            var cmd = Environment.CommandLine.Split(' ');
-            foreach (var param in cmd)
+            if (configuration != null)
             {
-                if (param.StartsWith("-property:"))
+                foreach (var keyValuePair in configuration.Globals)
                 {
-                    var prop = param.Substring(10).Split('=');
-                    if(prop != null || prop.Length == 2 && !props.ContainsKey(prop[0]))
-                        props.Add( prop[0], prop[1]);
+                    if (!props.ContainsKey(keyValuePair.Key))
+                        props.Add(keyValuePair.Key, keyValuePair.Value);
                 }
-
             }
+
             return props;
         }
     }

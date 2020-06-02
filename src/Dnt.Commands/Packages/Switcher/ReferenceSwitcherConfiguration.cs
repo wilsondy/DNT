@@ -18,7 +18,6 @@ namespace Dnt.Commands.Packages.Switcher
         public Dictionary<string, List<string>> Mappings { get; set; }
 
         [JsonProperty("globals")]
-        [JsonConverter(typeof(SingleOrArrayConverter))]
         public Dictionary<string, string> Globals { get; set; }
         
         [JsonProperty("restore", NullValueHandling = NullValueHandling.Ignore)]

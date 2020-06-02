@@ -60,7 +60,11 @@ namespace Dnt.Commands.Packages
                 {
                     try
                     {
-                        using (var projectInformation = ProjectExtensions.LoadProject(solutionProject.AbsolutePath, configuration?.Globals?[solutionProject.ProjectName]))
+                        Dictionary<string, string> projectGlobals = null;
+                        if (configuration?.Globals != null && configuration.Globals.ContainsKey(solutionProject.ProjectName))
+                            projectGlobals = configuration.Globals[solutionProject.ProjectName];
+                        
+                        using (var projectInformation = ProjectExtensions.LoadProject(solutionProject.AbsolutePath, projectGlobals))
                         {
                             foreach (var mapping in configuration.Mappings)
                             {

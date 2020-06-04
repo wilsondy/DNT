@@ -18,7 +18,7 @@
     <Description>Command line tools to manage .NET Core, Standard and SDK-style projects and solutions.</Description>
     <PackageProjectUrl>https://github.com/wilsondy/DNT</PackageProjectUrl>
     <PackageLicenseUrl>https://github.com/RSuter/DNT/blob/master/LICENSE.md</PackageLicenseUrl>
-    <PackageVersion>1.4.1.7</PackageVersion>
+    <PackageVersion>1.4.1.8</PackageVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)'=='Release|netcoreapp2.1'">
     <OutputPath>..\Dnt.Npm\bin\binaries\NetCore21</OutputPath>

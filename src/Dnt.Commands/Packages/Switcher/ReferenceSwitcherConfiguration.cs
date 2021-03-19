@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using Dnt.Commands.Infrastructure;
+using NConsole;
 using Newtonsoft.Json;
 
 namespace Dnt.Commands.Packages.Switcher
@@ -25,15 +26,24 @@ namespace Dnt.Commands.Packages.Switcher
         [JsonIgnore]
         public string ActualSolution => PathUtilities.ToAbsolutePath(Solution, System.IO.Path.GetDirectoryName(Path));
 
+        [JsonProperty("removeProjects", NullValueHandling = NullValueHandling.Ignore)]
+        public bool RemoveProjects { get; set; } = true;
+
         public string GetActualPath(string path)
         {
             return PathUtilities.ToAbsolutePath(path, System.IO.Path.GetDirectoryName(Path));
         }
 
-        public static ReferenceSwitcherConfiguration Load(string filePath)
+        public static ReferenceSwitcherConfiguration Load(string fileName, IConsoleHost host)
         {
-            var c = JsonConvert.DeserializeObject<ReferenceSwitcherConfiguration>(File.ReadAllText(filePath));
-            c.Path = PathUtilities.ToAbsolutePath(filePath, Directory.GetCurrentDirectory());
+            if (!File.Exists(fileName))
+            {
+                host.WriteError($"File '{fileName}' not found.");
+                return null;
+            }
+
+            var c = JsonConvert.DeserializeObject<ReferenceSwitcherConfiguration>(File.ReadAllText(fileName));
+            c.Path = PathUtilities.ToAbsolutePath(fileName, Directory.GetCurrentDirectory());
             return c;
         }
 

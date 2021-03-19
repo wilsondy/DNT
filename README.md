@@ -1,7 +1,7 @@
 # DNT (DotNetTools)
 ## Command line tools to manage .NET Core, Standard and SDK-style projects and solutions
 
-[![NuGet Version](https://img.shields.io/nuget/v/DNT.svg)](https://www.nuget.org/packages?q=DNT)
+[![NuGet Version](https://img.shields.io/nuget/v/DNT.svg)](https://www.nuget.org/packages/DNT)
 [![npm](https://img.shields.io/npm/v/dotnettools.svg)](https://www.npmjs.com/package/dotnettools)
 
 **Command and parameter names may improve or change over time. Please create issues or PRs if you'd like to fix, change or add a command.**
@@ -176,17 +176,27 @@ Create a `switcher.json` file and specify the solution to look for projects, and
 Then switch to projects in the solution: 
 
 ```
-dnt switch-to-projects switcher.json
+dnt switch-to-projects
+```
+
+The command looks for `switcher.json` configuration file by default, but you can specify your own file:
+
+```
+dnt switch-to-projects switch-config.json
 ```
 
 Now all NJsonSchema package references in the NSwag solution are replaced by local project references and the NJsonSchema projects are added to the solution.
+
+**Optional `switcher.json` Flags:**
+
+- removeProjects: (Default: true) Removes mapped projects from the solution and ignores mapped projects when using switch-to-packages.
 
 ### switch-to-packages
 
 After implementing and testing, switch back to NuGet references and update to the latest version: 
 
 ```
-dnt switch-to-packages switcher.json
+dnt switch-to-packages
 dnt update-packages NJsonSchema*
 ```
 
@@ -274,6 +284,18 @@ Handle all warnings as errors in all selected projects:
 dnt enable warnaserror
 ```
 
+### nowarn
+
+Adds a diagnostic id to the `<NoWarn>` tag (supports muliple ids, semicolon separated).
+
+**Samples:**
+
+Disable "Missing XML comment for publicly visible type or member" warnings in all selected projects:
+
+```
+dnt nowarn CS1591
+```
+
 ### add-target-framework
 
 Add another target framework to the selected projects.
@@ -299,6 +321,41 @@ dnt add-target-framework netstandard2.0
 ### clean
 
 Deletes all /bin and /obj directories of the selected projects.
+
+### change-versions
+
+Replaces or sets the package version of the selected projects.  Projects must have the GeneratePackageOnBuild flag set.
+
+**Command:**
+
+```
+dnt change-versions version [replace|force]
+```
+
+**Parameters:**
+
+- Version: The full version number using the format 'major.minor[.patch][.revision]'. Version will be padded to three parts.
+- Action: Action to perform (replace|force). replace (default) = Only set for projects with an existing version, force = Set for all projects even if version is missing or blank
+
+**Samples:**
+
+Replace projects with an existing version tag with 1.0.1:
+
+```
+dnt change-versions 1.0.1
+```
+
+Force set all projects to 1.2.0
+
+```
+dnt change-versions 1.2 force
+```
+
+Replace version with a long version:
+
+```
+dnt change-versions 1.2.3.4-PreRelease1 replace
+```
 
 # DNT development and testing
 

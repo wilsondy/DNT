@@ -11,18 +11,26 @@ using NConsole;
 
 namespace Dnt.Commands.Packages
 {
-    [Command(Name = "switch-to-packages")]
+    [Command(Name = "switch-to-packages", Description = "Switch project references to NuGet references")]
     public class SwitchProjectsToPackagesCommand : CommandBase
     {
-        [Argument(Position = 1)]
-        public string Configuration { get; set; }
+        [Argument(Position = 1, IsRequired = false, Description = "Configuration .json file")]
+        public string Configuration { get; set; } = "switcher.json";
 
         public override async Task<object> RunAsync(CommandLineProcessor processor, IConsoleHost host)
         {
-            var configuration = ReferenceSwitcherConfiguration.Load(Configuration);
+            var configuration = ReferenceSwitcherConfiguration.Load(Configuration, host);
+            if (configuration == null)
+            {
+                return null;
+            }
 
             SwitchToPackages(host, configuration);
-            await RemoveProjectsFromSolutionAsync(configuration, host);
+
+            if (configuration.RemoveProjects)
+            {
+                await RemoveProjectsFromSolutionAsync(configuration, host);
+            }
 
             configuration.Restore = null; // restore information no longer needed
             configuration.Save();
@@ -33,6 +41,7 @@ namespace Dnt.Commands.Packages
         private static void SwitchToPackages(IConsoleHost host, ReferenceSwitcherConfiguration configuration)
         {
             var solution = SolutionFile.Parse(configuration.ActualSolution);
+            var globalProperties = ProjectExtensions.GetGlobalProperties(Path.GetFullPath(configuration.ActualSolution));
             var mappedProjectFilePaths = configuration.Mappings.Values
                      .SelectMany(x => x)
                      .Select(p => Path.GetFileName(p))
@@ -45,7 +54,7 @@ namespace Dnt.Commands.Packages
                 {
                     try
                     {
-                        using (var projectInformation = ProjectExtensions.LoadProject(solutionProject.AbsolutePath))
+                        using (var projectInformation = ProjectExtensions.LoadProject(solutionProject.AbsolutePath, globalProperties))
                         {
                             foreach (var mapping in configuration.Mappings)
                             {
@@ -109,7 +118,8 @@ namespace Dnt.Commands.Packages
             var projectFileName = Path.GetFileName(solutionProject.AbsolutePath);
             var projectDirectory = Path.GetDirectoryName(solutionProject.AbsolutePath);
 
-            if (!mappedProjectFilePaths.Contains(projectFileName)) // do not modify mapped projects
+            // do not modify mapped projects unless we are always keeping them in the solution
+            if (!mappedProjectFilePaths.Contains(projectFileName) || !configuration.RemoveProjects)
             {
                 var restoreProjectInformation = (
                     from r in configuration.Restore

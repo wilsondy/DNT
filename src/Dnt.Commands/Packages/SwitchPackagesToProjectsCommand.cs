@@ -53,7 +53,7 @@ namespace Dnt.Commands.Packages
 
         private static void SwitchToProjects(ReferenceSwitcherConfiguration configuration, IConsoleHost host)
         {
-            var solution = SolutionFile.Parse(configuration.ActualSolution);
+            
             foreach (var solutionProject in solution.ProjectsInOrder)
             {
                 if (solutionProject.ProjectType != SolutionProjectType.SolutionFolder)
